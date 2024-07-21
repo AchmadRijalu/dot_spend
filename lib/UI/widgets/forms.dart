@@ -1,0 +1,98 @@
+import 'package:dot_spend/logic/date/date_cubit.dart';
+import 'package:dot_spend/theme/theme.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+
+class CustomFormField extends StatelessWidget {
+  final String? title;
+  final TextEditingController? controller;
+  final TextInputType? keyBoardType;
+  final AutovalidateMode? autovalidateMode;
+
+  const CustomFormField(
+      {super.key,
+      required this.title,
+      this.controller,
+      this.autovalidateMode,
+      this.keyBoardType});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          cursorColor: blackColor,
+          autovalidateMode: autovalidateMode,
+          keyboardType: keyBoardType,
+          controller: controller,
+          decoration: InputDecoration(
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: blackColor, width: 2.0),
+              ),
+              hintText: title,
+              contentPadding: const EdgeInsets.all(12),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+        )
+      ],
+    );
+  }
+}
+
+class CustomFormFieldDate extends StatelessWidget {
+  final TextEditingController? controller;
+  final String? title;
+
+  CustomFormFieldDate({
+    Key? key,
+    this.controller,
+    this.title,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DateCubit, DateState>(
+      builder: (context, state) {
+        return TextFormField(
+          readOnly: true,
+          onTap: () async {
+            final pickedDate = await showDatePicker(
+              context: context,
+              initialDate:
+                  state is DateSelected ? state.selectedDate : DateTime.now(),
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2034),
+            );
+            if (pickedDate != null) {
+              context.read<DateCubit>().setDate(pickedDate);
+              final formattedDate =
+                  DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(pickedDate);
+              controller!.text = formattedDate;
+            }
+          },
+          controller: controller,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          validator: (value) {
+            return value!.isEmpty ? "Tanggal tidak boleh kosong" : null;
+          },
+          decoration: InputDecoration(
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: blackColor, width: 2.0),
+              ),
+              hintText: title,
+              contentPadding: const EdgeInsets.all(12),
+              suffixIcon: Icon(
+                Icons.calendar_today,
+                color: blackColor,
+              ),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+        );
+      },
+    );
+  }
+}
