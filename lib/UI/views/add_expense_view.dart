@@ -24,6 +24,16 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   CategoryModel? _selectedCategory;
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (categories.isNotEmpty && categories.length > 1) {
+      _selectedCategory = categories[1];
+      _categoryController.text = _selectedCategory!.title;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -79,9 +89,10 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(50),
-                    color: greyColor,
+                    color: lightGreyColor,
                   ),
-                  child: Icon(Icons.arrow_forward_ios, color: whiteColor, size: 18),
+                  child: Icon(Icons.arrow_forward_ios,
+                      color: blackColor, size: 18),
                 ),
               ),
             ),

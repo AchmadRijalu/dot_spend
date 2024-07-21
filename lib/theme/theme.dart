@@ -18,9 +18,9 @@ Color categoryBlueHiburanColor = Color(0xff2F80ED);
 Color whiteColor = const Color(0xffFFFFFF);
 Color blackColor = const Color(0xff14193F);
 Color greyColor = const Color(0xff828282);
+Color lightGreyColor = const Color(0xffE0E0E0);
 
 Color lightBackgroundColor = const Color(0xffF6F8FB);
-Color lightGreyColor = const Color(0xffF6F7FB);
 
 TextStyle blackTextStyle = GoogleFonts.sourceSans3(color: blackColor);
 TextStyle whiteTextStyle = GoogleFonts.sourceSans3(color: whiteColor);
