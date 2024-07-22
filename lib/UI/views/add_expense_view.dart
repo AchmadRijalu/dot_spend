@@ -7,6 +7,7 @@ import 'package:dot_spend/models/expense_model.dart';
 import 'package:dot_spend/shared/shared_method.dart';
 import 'package:dot_spend/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -25,15 +26,24 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   final TextEditingController _amountController = TextEditingController();
   final ExpenseBloc _expenseBloc = ExpenseBloc();
   CategoryModel? _selectedCategory;
+  bool isButtonEnabled = false;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (categories.isNotEmpty && categories.length > 1) {
       _selectedCategory = categories[1];
       _categoryController.text = _selectedCategory!.title;
     }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _categoryController.dispose();
+    _dateController.dispose();
+    _amountController.dispose();
+    super.dispose();
   }
 
   @override
@@ -49,8 +59,6 @@ class _AddExpenseViewState extends State<AddExpenseView> {
       ),
       body: BlocListener<ExpenseBloc, ExpenseState>(
         listener: (context, state) {
-          // TODO: implement listener
-
           if (state is AddExpenseSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text("Data Pengeluaran Berhasil Ditambahkan!"),
@@ -72,10 +80,18 @@ class _AddExpenseViewState extends State<AddExpenseView> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               CustomFormField(
-                  title: "Nama Pengeluaran", controller: _nameController),
-              const SizedBox(
-                height: 20,
+                title: "Nama Pengeluaran",
+                controller: _nameController,
+                onChanged: (value) {
+                  setState(() {
+                    isButtonEnabled = _nameController.text.isNotEmpty &&
+                        _categoryController.text.isNotEmpty &&
+                        _dateController.text.isNotEmpty &&
+                        _amountController.text.isNotEmpty;
+                  });
+                },
               ),
+              const SizedBox(height: 20),
               TextFormField(
                 readOnly: true,
                 onTap: () {
@@ -106,45 +122,70 @@ class _AddExpenseViewState extends State<AddExpenseView> {
                   hintText: "Category",
                   contentPadding: const EdgeInsets.all(12),
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   suffix: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50),
                       color: lightGreyColor,
                     ),
-                    child: Icon(Icons.arrow_forward_ios,
-                        color: blackColor, size: 18),
+                    child: Icon(
+                      Icons.arrow_forward_ios,
+                      color: blackColor,
+                      size: 18,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               CustomFormFieldDate(
                 controller: _dateController,
                 title: "Tanggal Pengeluaran",
+                onChanged: (value) {
+                  setState(() {
+                    isButtonEnabled = _nameController.text.isNotEmpty &&
+                        _categoryController.text.isNotEmpty &&
+                        _dateController.text.isNotEmpty &&
+                        _amountController.text.isNotEmpty;
+                  });
+                },
               ),
               const SizedBox(height: 20),
               CustomFormField(
-                  title: "Nominal",
-                  controller: _amountController,
-                  keyBoardType: TextInputType.number),
+                title: "Nominal",
+                formatter: FilteringTextInputFormatter.digitsOnly,
+                controller: _amountController,
+                keyBoardType: TextInputType.number,
+                onChanged: (value) {
+                  setState(() {
+                    isButtonEnabled = _nameController.text.isNotEmpty &&
+                        _categoryController.text.isNotEmpty &&
+                        _dateController.text.isNotEmpty &&
+                        _amountController.text.isNotEmpty;
+                  });
+                },
+              ),
               const SizedBox(height: 32),
               CustomFilledButton(
-                  title: "Simpan",
-                  color: blueColor,
-                  onPressed: () async {
-                    final ExpenseModel expenseModel = ExpenseModel(
-                      name: _nameController.text,
-                      category: _selectedCategory!.title,
-                      date: _dateController.text,
-                      amount: _amountController.text,
-                      imageCategory: _selectedCategory!.image,
-                      colorCategory: _selectedCategory!.color.value,
-                    );
-                    context.read<ExpenseBloc>().add(AddExpense(expenseModel));
-                  })
+                title: "Simpan",
+                color: isButtonEnabled ? blueColor : Colors.grey,
+                onPressed: isButtonEnabled
+                    ? () {
+                        final expenseModel = ExpenseModel(
+                          name: _nameController.text,
+                          category: _selectedCategory!.title,
+                          date: _dateController.text,
+                          amount: _amountController.text,
+                          imageCategory: _selectedCategory!.image,
+                          colorCategory: _selectedCategory!.color.value,
+                        );
+                        context
+                            .read<ExpenseBloc>()
+                            .add(AddExpense(expenseModel));
+                      }
+                    : null,
+              ),
             ],
           ),
         ),

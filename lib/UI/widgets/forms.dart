@@ -1,38 +1,50 @@
 import 'package:dot_spend/logic/date/date_cubit.dart';
 import 'package:dot_spend/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-class CustomFormField extends StatelessWidget {
+class CustomFormField extends StatefulWidget {
   final String? title;
   final TextEditingController? controller;
   final TextInputType? keyBoardType;
+  final TextInputFormatter? formatter;
   final AutovalidateMode? autovalidateMode;
-
+  final void Function(String)? onChanged;
   const CustomFormField(
       {super.key,
       required this.title,
       this.controller,
       this.autovalidateMode,
-      this.keyBoardType});
+      this.formatter,
+      this.keyBoardType,
+      this.onChanged});
 
+  @override
+  State<CustomFormField> createState() => _CustomFormFieldState();
+}
+
+class _CustomFormFieldState extends State<CustomFormField> {
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextFormField(
+          onChanged: widget.onChanged,
           cursorColor: blackColor,
-          autovalidateMode: autovalidateMode,
-          keyboardType: keyBoardType,
-          controller: controller,
+          autovalidateMode: widget.autovalidateMode,
+          keyboardType: widget.keyBoardType,
+          controller: widget.controller,
+          inputFormatters:
+              widget.formatter != null ? [widget.formatter!] : null,
           decoration: InputDecoration(
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: blackColor, width: 2.0),
               ),
-              hintText: title,
+              hintText: widget.title,
               contentPadding: const EdgeInsets.all(12),
               border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
@@ -45,11 +57,13 @@ class CustomFormField extends StatelessWidget {
 class CustomFormFieldDate extends StatelessWidget {
   final TextEditingController? controller;
   final String? title;
+  final void Function(String)? onChanged;
 
   CustomFormFieldDate({
     Key? key,
     this.controller,
     this.title,
+    this.onChanged,
   }) : super(key: key);
 
   @override
@@ -57,6 +71,7 @@ class CustomFormFieldDate extends StatelessWidget {
     return BlocBuilder<DateCubit, DateState>(
       builder: (context, state) {
         return TextFormField(
+          onChanged: onChanged,
           readOnly: true,
           onTap: () async {
             final pickedDate = await showDatePicker(
