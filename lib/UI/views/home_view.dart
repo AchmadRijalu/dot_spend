@@ -70,20 +70,46 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   Row(
                     children: [
-                      Expanded(
-                        child: ExpenseByDate(
-                            color: blueColor,
-                            title: "Hari ini",
-                            moneyCount: 1000000),
+                      BlocBuilder<ExpenseBloc, ExpenseState>(
+                        builder: (context, state) {
+                          if (state is GetAllExpensesSuccess) {
+                            return Expanded(
+                              child: ExpenseByDate(
+                                  color: blueColor,
+                                  title: "Hari ini",
+                                  moneyCount: state.todayExpenses.toInt()),
+                            );
+                          } else if (state is ExpensesFailed) {
+                            return Expanded(
+                              child: Column(children: [
+                                Text(state.error.toString()),
+                              ]),
+                            );
+                          }
+                          return Container();
+                        },
                       ),
                       const SizedBox(
                         width: 19,
                       ),
-                      Expanded(
-                        child: ExpenseByDate(
-                            color: tealColor,
-                            title: "Bulan ini",
-                            moneyCount: 1000000),
+                      BlocBuilder<ExpenseBloc, ExpenseState>(
+                        builder: (context, state) {
+                          if (state is GetAllExpensesSuccess) {
+                            return Expanded(
+                              child: ExpenseByDate(
+                                  color: tealColor,
+                                  title: "Bulan ini",
+                                  moneyCount: state.monthExpenses.toInt()),
+                            );
+                          } else if (state is ExpensesFailed) {
+                            return Expanded(
+                              child: Column(children: [
+                                Text(state.error.toString()),
+                              ]),
+                            );
+                          }
+                          return Container();
+                        },
                       ),
                     ],
                   ),
@@ -114,8 +140,7 @@ class _HomeViewState extends State<HomeView> {
                                       0.0;
                               return ExpenseByCategory(
                                 categoryModel: category,
-                                price: totalAmount
-                                    .toInt(), 
+                                price: totalAmount.toInt(),
                               );
                             },
                           ),

@@ -11,12 +11,12 @@ class ExpenseByDate extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        
         borderRadius: BorderRadius.circular(16),
         color: color,
       ),
       padding: const EdgeInsets.only(left: 16, right: 46, top: 14, bottom: 10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "Pengeluaranmu\n$title",

@@ -10,14 +10,16 @@ part 'expense_state.dart';
 class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
   ExpenseBloc() : super(ExpenseInitial()) {
     on<ExpenseEvent>((event, emit) async {
-      // TODO: implement event handler
-
       if (event is GetAllExpenses) {
         try {
-          final expense = await ExpenseDb().getAllExpenses();
-          final groupedExpenses = _expensesByDate(expense);
-          final accumulatedExpenses = _accumulateExpensesByCategory(expense);
-          emit(GetAllExpensesSuccess(groupedExpenses, accumulatedExpenses));
+          final expenses = await ExpenseDb().getAllExpenses();
+          final groupedExpenses = _expensesByDate(expenses);
+          final accumulatedExpenses = _accumulateExpensesByCategory(expenses);
+          final todayExpenses = _accumulateExpensesByDate(expenses, 'Hari Ini');
+          final monthExpenses =
+              _accumulateExpensesByDate(expenses, 'Bulan Ini');
+          emit(GetAllExpensesSuccess(groupedExpenses, accumulatedExpenses,
+              todayExpenses, monthExpenses));
         } catch (e) {
           emit(ExpensesFailed(e.toString()));
         }
@@ -34,43 +36,68 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
     });
   }
 
-  Map<String, List<ExpenseModel>> _expensesByDate(
-      List<ExpenseModel> expenses) {
+  Map<String, List<ExpenseModel>> _expensesByDate(List<ExpenseModel> expenses) {
     final Map<String, List<ExpenseModel>> groupedExpenses = {};
-    for (var expense in expenses) {
-      final date = _parseExpenseDate(expense.date);
-      if (!groupedExpenses.containsKey(date)) {
-        groupedExpenses[date] = [];
-      }
-      groupedExpenses[date]!.add(expense);
-    }
-    return groupedExpenses;
-  }
-
-  String _parseExpenseDate(String dateString) {
-    final DateFormat format = DateFormat('EEEE, dd MMMM yyyy', 'id_ID');
-    DateTime date = format.parse(dateString);
-
+    final DateFormat fullDateFormat = DateFormat('EEEE, dd MMMM yyyy', 'id_ID');
     final DateTime now = DateTime.now();
     final DateTime today = DateTime(now.year, now.month, now.day);
     final DateTime yesterday = today.subtract(const Duration(days: 1));
 
-    if (date == today) {
-      return "Hari Ini";
-    } else if (date == yesterday) {
-      return "Kemarin";
-    } else {
-      return DateFormat('dd MMM yyyy').format(date);
+    for (var expense in expenses) {
+      DateTime expenseDate = fullDateFormat.parse(expense.date);
+      String dateLabel;
+
+      if (expenseDate == today) {
+        dateLabel = "Hari Ini";
+      } else if (expenseDate == yesterday) {
+        dateLabel = "Kemarin";
+      } else {
+        dateLabel = DateFormat('dd MMM yyyy').format(expenseDate);
+      }
+
+      if (!groupedExpenses.containsKey(dateLabel)) {
+        groupedExpenses[dateLabel] = [];
+      }
+      groupedExpenses[dateLabel]!.add(expense);
     }
+    return groupedExpenses;
   }
 
-  Map<String, double> _accumulateExpensesByCategory(List<ExpenseModel> expenses) {
+  double _accumulateExpensesByDate(
+      List<ExpenseModel> expenses, String dateType) {
+    double total = 0.0;
+    final DateTime now = DateTime.now();
+    final DateTime today = DateTime(now.year, now.month, now.day);
+    final DateTime startOfMonth = DateTime(now.year, now.month, 1);
+    final DateFormat fullDateFormat = DateFormat('EEEE, dd MMMM yyyy', 'id_ID');
+
+    for (var expense in expenses) {
+      try {
+        DateTime expenseDate = fullDateFormat.parse(expense.date);
+
+        if (dateType == 'Hari Ini' && expenseDate == today) {
+          total += double.parse(expense.amount);
+        } else if (dateType == 'Bulan Ini' &&
+            expenseDate.isAfter(startOfMonth.subtract(Duration(days: 1))) &&
+            expenseDate.isBefore(now.add(Duration(days: 1)))) {
+          total += double.parse(expense.amount);
+        }
+      } catch (e) {
+        print("Date parsing error: $e");
+      }
+    }
+    return total;
+  }
+
+  Map<String, double> _accumulateExpensesByCategory(
+      List<ExpenseModel> expenses) {
     final Map<String, double> accumulatedExpenses = {};
     for (var expense in expenses) {
       if (!accumulatedExpenses.containsKey(expense.category)) {
         accumulatedExpenses[expense.category] = 0.0;
       }
-      accumulatedExpenses[expense.category] = accumulatedExpenses[expense.category]! + double.parse(expense.amount);
+      accumulatedExpenses[expense.category] =
+          accumulatedExpenses[expense.category]! + double.parse(expense.amount);
     }
     return accumulatedExpenses;
   }

@@ -12,11 +12,13 @@ final class ExpenseInitial extends ExpenseState {}
 final class GetAllExpensesSuccess extends ExpenseState {
   final Map<String, List<ExpenseModel>> expenses;
   final Map<String, double> accumulatedExpenses;
+  final double todayExpenses;
+  final double monthExpenses;
 
-  GetAllExpensesSuccess(this.expenses, this.accumulatedExpenses);
+  GetAllExpensesSuccess(this.expenses, this.accumulatedExpenses, this.todayExpenses, this.monthExpenses);
 
   @override
-  List<Object> get props => [expenses, accumulatedExpenses];
+  List<Object> get props => [expenses, accumulatedExpenses, todayExpenses, monthExpenses];
 }
 
 final class ExpensesFailed extends ExpenseState {
