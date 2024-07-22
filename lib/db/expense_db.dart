@@ -22,9 +22,9 @@ class ExpenseDb {
         id INTEGER PRIMARY KEY, 
         name TEXT, 
         category TEXT, 
-        date TEXT,
-        price TEXT
         imageCategory TEXT,
+        date TEXT,
+        amount TEXT,
         colorCategory INTEGER
       )
     ''');

@@ -33,21 +33,21 @@ class ListExpenseItem extends StatelessWidget {
             child: Row(
               children: [
                 SvgPicture.asset(
-                  "assets/images/image_home.svg",
-                  color: Colors.amber,
+                  "${expenseModel?.imageCategory}",
+                  color: Color(expenseModel?.colorCategory ?? 0),
                 ),
                 const SizedBox(
                   width: 14,
                 ),
                 Text(
-                  "Makanan",
+                  "${expenseModel?.name}",
                   style: blackTextStyle.copyWith(
                       fontSize: 14, fontWeight: regular),
                 ),
               ],
             ),
           ),
-          Text("Rp. 15.000",
+          Text("Rp. ${expenseModel?.amount}",
               style:
                   blackTextStyle.copyWith(fontSize: 14, fontWeight: semiBold))
         ],

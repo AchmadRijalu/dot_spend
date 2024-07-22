@@ -53,7 +53,7 @@ class ExpenseByCategory extends StatelessWidget {
             height: 8,
           ),
           Text(
-            "Rp. 70.000",
+            "Rp. $price",
             style: TextStyle(
                 color: Colors.black, fontWeight: FontWeight.bold, fontSize: 12),
             maxLines: 1,

@@ -2,18 +2,18 @@ class ExpenseModel {
   final int? id;
   final String name;
   final String category;
-  final String date;
   final String imageCategory;
+  final String date;
+  final String amount;
   final int colorCategory;
-  final String price;
 
   ExpenseModel({
     this.id,
     required this.name,
     required this.category,
-    required this.date,
     required this.imageCategory,
-    required this.price,
+    required this.date,
+    required this.amount,
     required this.colorCategory,
   });
 
@@ -21,21 +21,20 @@ class ExpenseModel {
         'id': id,
         'name': name,
         'category': category,
-        'date': date,
-        'price': price,
         'imageCategory': imageCategory,
+        'date': date,
+        'amount': amount,
         'colorCategory': colorCategory,
-
-        
       };
 
-  factory ExpenseModel.fromDatabaseJson(Map<String, dynamic> json) => ExpenseModel(
+  factory ExpenseModel.fromDatabaseJson(Map<String, dynamic> json) =>
+      ExpenseModel(
         id: json['id'],
         name: json['name'],
         category: json['category'],
-        date: json['date'],
-        price: json['price'],
         imageCategory: json['imageCategory'],
+        date: json['date'],
+        amount: json['amount'],
         colorCategory: json['colorCategory'],
       );
 }

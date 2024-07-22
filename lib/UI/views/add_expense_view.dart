@@ -1,10 +1,13 @@
 import 'package:bottom_sheet/bottom_sheet.dart';
 import 'package:dot_spend/UI/widgets/button.dart';
 import 'package:dot_spend/UI/widgets/forms.dart';
+import 'package:dot_spend/logic/expense/expense_bloc.dart';
 import 'package:dot_spend/models/category_model.dart';
+import 'package:dot_spend/models/expense_model.dart';
 import 'package:dot_spend/shared/shared_method.dart';
 import 'package:dot_spend/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class AddExpenseView extends StatefulWidget {
@@ -20,7 +23,7 @@ class _AddExpenseViewState extends State<AddExpenseView> {
   final TextEditingController _categoryController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
-
+  final ExpenseBloc _expenseBloc = ExpenseBloc();
   CategoryModel? _selectedCategory;
 
   @override
@@ -44,74 +47,106 @@ class _AddExpenseViewState extends State<AddExpenseView> {
           style: blackTextStyle.copyWith(fontWeight: bold),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 38),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            CustomFormField(
-                title: "Nama Pengeluaran", controller: _nameController),
-            const SizedBox(
-              height: 20,
-            ),
-            TextFormField(
-              readOnly: true,
-              onTap: () {
-                showFlexibleBottomSheet(
-                  minHeight: 0,
-                  initHeight: 0.5,
-                  maxHeight: 0.5,
-                  context: context,
-                  builder: _buildBottomSheet,
-                );
-              },
-              cursorColor: blackColor,
-              controller: _categoryController,
-              decoration: InputDecoration(
-                prefixIcon: _selectedCategory != null
-                    ? Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: SvgPicture.asset(
-                          _selectedCategory!.image,
-                          color: _selectedCategory!.color,
-                        ),
-                      )
-                    : null,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: blackColor, width: 2.0),
-                ),
-                hintText: "Category",
-                contentPadding: const EdgeInsets.all(12),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                suffix: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: lightGreyColor,
+      body: BlocListener<ExpenseBloc, ExpenseState>(
+        listener: (context, state) {
+          // TODO: implement listener
+
+          if (state is AddExpenseSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text("Data Pengeluaran Berhasil Ditambahkan!"),
+              backgroundColor: blueColor,
+            ));
+            Navigator.pop(context);
+          }
+
+          if (state is ExpensesFailed) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(state.error.toString()),
+              backgroundColor: blackColor,
+            ));
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 38),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CustomFormField(
+                  title: "Nama Pengeluaran", controller: _nameController),
+              const SizedBox(
+                height: 20,
+              ),
+              TextFormField(
+                readOnly: true,
+                onTap: () {
+                  showFlexibleBottomSheet(
+                    minHeight: 0,
+                    initHeight: 0.5,
+                    maxHeight: 0.5,
+                    context: context,
+                    builder: _buildBottomSheet,
+                  );
+                },
+                cursorColor: blackColor,
+                controller: _categoryController,
+                decoration: InputDecoration(
+                  prefixIcon: _selectedCategory != null
+                      ? Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: SvgPicture.asset(
+                            _selectedCategory!.image,
+                            color: _selectedCategory!.color,
+                          ),
+                        )
+                      : null,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: blackColor, width: 2.0),
                   ),
-                  child: Icon(Icons.arrow_forward_ios,
-                      color: blackColor, size: 18),
+                  hintText: "Category",
+                  contentPadding: const EdgeInsets.all(12),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  suffix: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: lightGreyColor,
+                    ),
+                    child: Icon(Icons.arrow_forward_ios,
+                        color: blackColor, size: 18),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            CustomFormFieldDate(
-              controller: _dateController,
-              title: "Tanggal Pengeluaran",
-            ),
-            const SizedBox(height: 20),
-            CustomFormField(
-                title: "Nominal",
-                controller: _amountController,
-                keyBoardType: TextInputType.number),
-            const SizedBox(height: 32),
-            CustomFilledButton(
-                title: "Simpan", color: blueColor, onPressed: () {})
-          ],
+              const SizedBox(
+                height: 20,
+              ),
+              CustomFormFieldDate(
+                controller: _dateController,
+                title: "Tanggal Pengeluaran",
+              ),
+              const SizedBox(height: 20),
+              CustomFormField(
+                  title: "Nominal",
+                  controller: _amountController,
+                  keyBoardType: TextInputType.number),
+              const SizedBox(height: 32),
+              CustomFilledButton(
+                  title: "Simpan",
+                  color: blueColor,
+                  onPressed: () async {
+                    final ExpenseModel expenseModel = ExpenseModel(
+                      name: _nameController.text,
+                      category: _selectedCategory!.title,
+                      date: _dateController.text,
+                      amount: _amountController.text,
+                      imageCategory: _selectedCategory!.image,
+                      colorCategory: _selectedCategory!.color.value,
+                    );
+                    context.read<ExpenseBloc>().add(AddExpense(expenseModel));
+                  })
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:dot_spend/UI/views/add_expense_view.dart';
 import 'package:dot_spend/UI/views/home_view.dart';
 import 'package:dot_spend/logic/date/date_cubit.dart';
+import 'package:dot_spend/logic/expense/expense_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -21,10 +22,12 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => DateCubit(DateTime.now()),
           ),
+          BlocProvider(
+            create: (context) => ExpenseBloc(),
+          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          
           title: 'Dot Spend',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
